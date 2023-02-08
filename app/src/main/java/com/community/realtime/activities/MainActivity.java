@@ -1,8 +1,10 @@
-package com.community.realtime;
+package com.community.realtime.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+
+import com.community.realtime.R;
 
 public class MainActivity extends AppCompatActivity {
 

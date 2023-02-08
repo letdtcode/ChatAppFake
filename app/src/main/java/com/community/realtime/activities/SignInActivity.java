@@ -2,11 +2,17 @@ package com.community.realtime.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Application;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.widget.Toast;
 
 import com.community.realtime.R;
 import com.community.realtime.databinding.ActivitySignInBinding;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
 
 public class SignInActivity extends AppCompatActivity {
     private ActivitySignInBinding binding;
