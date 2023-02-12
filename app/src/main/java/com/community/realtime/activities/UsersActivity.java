@@ -5,7 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 
-import com.community.realtime.R;
+import com.community.realtime.adapters.UsersAdapter;
 import com.community.realtime.databinding.ActivityUsersBinding;
 import com.community.realtime.models.User;
 import com.community.realtime.utilities.Constants;
@@ -27,6 +27,11 @@ public class UsersActivity extends AppCompatActivity {
         binding = ActivityUsersBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         preferenceManager = new PreferenceManager(getApplicationContext());
+        setListeners();
+        getUsers();
+    }
+    private void setListeners() {
+        binding.imageBack.setOnClickListener(v -> onBackPressed());
     }
     private void getUsers() {
         loading(true);
@@ -50,10 +55,16 @@ public class UsersActivity extends AppCompatActivity {
                             users.add(user);
                         }
                         if (users.size() > 0) {
-                            
+                            UsersAdapter usersAdapter = new UsersAdapter(users);
+                            binding.userRecycleView.setAdapter(usersAdapter);
+                            binding.userRecycleView.setVisibility(View.VISIBLE);
+                        } else {
+                            showErrorMessage();
                         }
+                    } else {
+                        showErrorMessage();
                     }
-                })
+                });
     }
     private void showErrorMessage() {
         binding.textErrorMessage.setText(String.format("%s","No user available"));
