@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Base64;
+import android.view.View;
 
 import com.community.realtime.adapters.ChatAdapter;
 import com.community.realtime.databinding.ActivityChatBinding;
@@ -20,8 +21,8 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -43,6 +44,7 @@ public class ChatActivity extends AppCompatActivity {
         setListeners();
         loadReceiverDetails();
         init();
+        listenMessages();
     }
 
     private void init() {
@@ -67,6 +69,17 @@ public class ChatActivity extends AppCompatActivity {
         binding.inputMessage.setText(null);
     }
 
+    private void listenMessages() {
+        database.collection(Constants.KEY_COLLECTION_CHAT)
+                .whereEqualTo(Constants.KEY_SENDER_ID, preferenceManager.getString(Constants.KEY_USER_ID))
+                .whereEqualTo(Constants.KEY_RECEIVER_ID, receiverUser.id)
+                .addSnapshotListener(eventListener);
+        database.collection(Constants.KEY_COLLECTION_CHAT)
+                .whereEqualTo(Constants.KEY_SENDER_ID, receiverUser.id)
+                .whereEqualTo(Constants.KEY_RECEIVER_ID, preferenceManager.getString(Constants.KEY_USER_ID))
+                .addSnapshotListener(eventListener);
+    }
+
     private final EventListener<QuerySnapshot> eventListener = (value, error) -> {
         if (error != null) {
             return;
@@ -84,8 +97,16 @@ public class ChatActivity extends AppCompatActivity {
                     chatMessages.add(chatMessage);
                 }
             }
-            Collections.sort(chatMessages, (obj1, obj2) -> obj1.dateObject.compareTo(obj2.dateObject));
+            Collections.sort(chatMessages, (o1, o2) -> o1.dateObject.compareTo(o2.dateObject));
+            if (count == 0) {
+                chatAdapter.notifyDataSetChanged();
+            } else {
+                chatAdapter.notifyItemRangeInserted(chatMessages.size(), chatMessages.size());
+                binding.chatRecyclerView.smoothScrollToPosition(chatMessages.size() - 1);
+            }
+            binding.chatRecyclerView.setVisibility(View.VISIBLE);
         }
+        binding.progresBar.setVisibility(View.GONE);
     };
 
     private Bitmap getBitmapFromEncodedString(String encodedImage) {
@@ -97,6 +118,7 @@ public class ChatActivity extends AppCompatActivity {
         receiverUser = (User) getIntent().getSerializableExtra(Constants.KEY_USER);
         binding.textName.setText(receiverUser.name);
     }
+
     private void setListeners() {
         binding.imageBack.setOnClickListener(v -> onBackPressed());
         binding.layoutSend.setOnClickListener(v -> sendMessage());
